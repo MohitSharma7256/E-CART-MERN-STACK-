@@ -1,17 +1,17 @@
+// index.js
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
 require("./db-connect");
 const Router = require("./routes/index");
-const PaymentRouter = require("./routes/PaymentRoutes");
 
 const app = express();
 
 // CORS
 app.use(
   cors({
-    origin: true,
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -19,21 +19,24 @@ app.use(
 
 app.use(express.json());
 
-// Routes
+// API Routes
 app.use("/api", Router);
-// app.use("/api/payment", PaymentRouter);
 
 const path = require("path");
 
-// Static frontend
+// STATIC FILES (React build)
 app.use(express.static(path.join(__dirname, "dist")));
 app.use("/public", express.static(path.join(__dirname, "public")));
 
-// Fallback route (IMPORTANT FIX)
-app.get("/*", (req, res) => {
+// ⭐ EXPESS v5 DOES NOT SUPPORT app.get("*")
+// So use app.use() fallback
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
-// Server
+// ❗ PORT FIX
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
